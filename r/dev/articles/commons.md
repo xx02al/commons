@@ -125,6 +125,13 @@ occur:
 The agent itself does not determine the provenance outcome. commons
 derives it deterministically from the agent’s behavior.
 
+To turn off the lower-trust path altogether, use
+`agent(mode = "trusted only")`. In this mode, the agent can’t write its
+own SQL or R code; it answers only with trusted calculations. If no
+trusted calculation answers a question, it tells the user so. Since
+every answer comes from a trusted calculation, answers carry no
+provenance markers.
+
 ## Information layers
 
 commons distinguishes between two primary layers of information: the
@@ -329,12 +336,14 @@ files:
 
 ## Constructing the agent
 
-Use
+Construct an agent in two steps. First, use
 [`commons()`](https://posit-dev.github.io/commons/r/dev/reference/commons.md)
-to construct an agent. Pass it an ellmer `Chat` and one or more data
-sources, along with any semantic and context layers. You can also
-optionally append information to the commons agent system prompt using
-the `instructions` argument.
+to gather one or more data sources, along with any semantic and context
+layers, into “the commons”. You can optionally append information to the
+commons agent system prompt using
+[`commons()`](https://posit-dev.github.io/commons/r/dev/reference/commons.md)’s
+`instructions` argument. Then pass an ellmer `Chat` and the commons to
+[`agent()`](https://posit-dev.github.io/commons/r/dev/reference/agent.md).
 
 ``` r
 
@@ -346,12 +355,16 @@ biodiversity <- data_source(
   dictionary = "dictionaries/biodiversity.yaml"
 )
 
-agent <- commons(
-  client = ellmer::chat("anthropic/claude-sonnet-5"),
+commons <- commons(
   data_sources = list(biodiversity = biodiversity),
   semantic_layer = semantic_layer("measures"),
   context_layer = context_layer("context/context.md"),
   instructions = "instructions.md"
+)
+
+agent <- agent(
+  client = ellmer::chat("anthropic/claude-sonnet-5"),
+  commons = commons
 )
 
 commons_app(agent)
@@ -370,6 +383,10 @@ warms the agent during post-startup idle time; `agent$prewarm()` warms
 the context index and pins cache ahead of deployment. This example
 assumes that `observations` and `site_area` are data frames loaded when
 the app starts.
+
+To reuse the same trusted calculations in reports, apps, and other
+projects, see [Sharing a commons across
+projects](https://posit-dev.github.io/commons/r/dev/articles/sharing.md).
 
 [^1]: commons expands definitions used in custom SQL to expressions
     compiled for the data source. Because this is still custom SQL, the

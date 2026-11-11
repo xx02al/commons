@@ -30,11 +30,11 @@ commons_theme(..., preset = "shiny")
 
 - client:
 
-  A
-  [`commons()`](https://posit-dev.github.io/commons/r/dev/reference/commons.md)
-  agent. In a deployed app, create the agent inside the server function
-  and pass it to `commons_server()` so each Shiny session gets its own
-  agent state.
+  An
+  [`agent()`](https://posit-dev.github.io/commons/r/dev/reference/agent.md).
+  In a deployed app, create the agent inside the server function and
+  pass it to `commons_server()` so each Shiny session gets its own agent
+  state.
 
 - ...:
 
@@ -57,6 +57,15 @@ object.
 
 ## Details
 
+Documents the agent writes open in the chat's drawer, which
+[`shinychat::page_chat()`](https://posit-dev.github.io/shinychat/r/reference/page_chat.html)
+and
+[`shinychat::chat_ui()`](https://posit-dev.github.io/shinychat/r/reference/chat_ui.html)
+enable by default. An app that passes `drawer = FALSE` gets no documents
+in view, though the agent still writes them. Documents read best in a
+wider drawer than the default, e.g.
+`drawer = shinychat::chat_drawer(width = 640, open = FALSE)`.
+
 `commons_theme()` bundles the commons chat CSS and JavaScript into an
 ordinary
 [`bslib::bs_theme()`](https://rstudio.github.io/bslib/reference/bs_theme.html)
@@ -75,9 +84,9 @@ ui <- page_chat("Assistant", id = "chat", theme = commons_theme())
 
 server <- function(input, output, session) {
   # One agent per session, so each user gets their own agent state
-  agent <- commons(
+  agent <- agent(
     ellmer::chat_anthropic(),
-    data_sources = data_source(sales = sales)
+    commons = commons(data_sources = data_source(sales = sales))
   )
   commons_server("chat", agent)
 }

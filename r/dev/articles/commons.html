@@ -42,6 +42,8 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/governance.html">Security and governance for commons agents</a></li>
+    <li><a class="dropdown-item" href="../articles/reproducibility.html">Reproducing an analysis from trajectories</a></li>
+    <li><a class="dropdown-item" href="../articles/sharing.html">Sharing a commons across projects</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -228,6 +230,12 @@ information)</td>
 </table>
 <p>The agent itself does not determine the provenance outcome. commons
 derives it deterministically from the agent’s behavior.</p>
+<p>To turn off the lower-trust path altogether, use
+<code>agent(mode = "trusted only")</code>. In this mode, the agent can’t
+write its own SQL or R code; it answers only with trusted calculations.
+If no trusted calculation answers a question, it tells the user so.
+Since every answer comes from a trusted calculation, answers carry no
+provenance markers.</p>
 </div>
 <div class="section level2">
 <h2 id="information-layers">Information layers<a class="anchor" aria-label="anchor" href="#information-layers"></a>
@@ -470,11 +478,12 @@ separate files:</p>
 <div class="section level2">
 <h2 id="constructing-the-agent">Constructing the agent<a class="anchor" aria-label="anchor" href="#constructing-the-agent"></a>
 </h2>
-<p>Use <code><a href="../reference/commons.html">commons()</a></code> to construct an agent. Pass it an ellmer
-<code>Chat</code> and one or more data sources, along with any semantic
-and context layers. You can also optionally append information to the
-commons agent system prompt using the <code>instructions</code>
-argument.</p>
+<p>Construct an agent in two steps. First, use <code><a href="../reference/commons.html">commons()</a></code> to
+gather one or more data sources, along with any semantic and context
+layers, into “the commons”. You can optionally append information to the
+commons agent system prompt using <code><a href="../reference/commons.html">commons()</a></code>’s
+<code>instructions</code> argument. Then pass an ellmer
+<code>Chat</code> and the commons to <code><a href="../reference/agent.html">agent()</a></code>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/posit-dev/commons" class="external-link">commons</a></span><span class="op">)</span></span>
 <span></span>
@@ -484,12 +493,16 @@ argument.</p>
 <span>  dictionary <span class="op">=</span> <span class="st">"dictionaries/biodiversity.yaml"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">agent</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/commons.html">commons</a></span><span class="op">(</span></span>
-<span>  client <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat-any.html" class="external-link">chat</a></span><span class="op">(</span><span class="st">"anthropic/claude-sonnet-5"</span><span class="op">)</span>,</span>
+<span><span class="va">commons</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/commons.html">commons</a></span><span class="op">(</span></span>
 <span>  data_sources <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>biodiversity <span class="op">=</span> <span class="va">biodiversity</span><span class="op">)</span>,</span>
 <span>  semantic_layer <span class="op">=</span> <span class="fu"><a href="../reference/semantic_layer.html">semantic_layer</a></span><span class="op">(</span><span class="st">"measures"</span><span class="op">)</span>,</span>
 <span>  context_layer <span class="op">=</span> <span class="fu"><a href="../reference/context_layer.html">context_layer</a></span><span class="op">(</span><span class="st">"context/context.md"</span><span class="op">)</span>,</span>
 <span>  instructions <span class="op">=</span> <span class="st">"instructions.md"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">agent</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/agent.html">agent</a></span><span class="op">(</span></span>
+<span>  client <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat-any.html" class="external-link">chat</a></span><span class="op">(</span><span class="st">"anthropic/claude-sonnet-5"</span><span class="op">)</span>,</span>
+<span>  commons <span class="op">=</span> <span class="va">commons</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/commons_app.html">commons_app</a></span><span class="op">(</span><span class="va">agent</span><span class="op">)</span></span></code></pre></div>
@@ -502,6 +515,9 @@ post-startup idle time; <code>agent$prewarm()</code> warms the context
 index and pins cache ahead of deployment. This example assumes that
 <code>observations</code> and <code>site_area</code> are data frames
 loaded when the app starts.</p>
+<p>To reuse the same trusted calculations in reports, apps, and other
+projects, see <a href="sharing.html">Sharing a commons across
+projects</a>.</p>
 </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
